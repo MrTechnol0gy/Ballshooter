@@ -5271,10 +5271,15 @@ MonoBehaviour:
   useCustomPositions: 0
   positions: []
   selectedPositionIndex: -1
-  addCollisionObjectAtTrunk: 0
   lodFade: 1
   lodFadeAnimate: 0
   lodTransitionWidth: 0.4
+  addCollider: 0
+  colliderType: 0
+  colliderScale: 1
+  colliderMeshResolution: 0.5
+  colliderMinLevel: 0
+  colliderMaxLevel: 1
 --- !u!1 &603907998
 GameObject:
   m_ObjectHideFlags: 1
@@ -6633,7 +6638,7 @@ MonoBehaviour:
   _localPipeline: {fileID: 1374310698}
   lastUndoProcessed: 12
   lastPrefabPath: Assets/BroccoTree_6.prefab
-  _instanceId: 50986
+  _instanceId: 67324
 --- !u!4 &1457250593
 Transform:
   m_ObjectHideFlags: 0
@@ -7194,4 +7199,3 @@ MonoBehaviour:
   useCustomPositions: 1
   positions: []
   selectedPositionIndex: -1
-  addCollisionObjectAtTrunk: 0

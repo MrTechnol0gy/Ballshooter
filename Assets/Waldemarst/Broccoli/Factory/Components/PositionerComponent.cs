@@ -45,44 +45,9 @@ namespace Broccoli.Component
 		{
 			if (pipelineElement != null && tree != null) {
 				positionerElement = pipelineElement as PositionerElement;
-				if (positionerElement.addCollisionObjectAtTrunk) {
-					AddCollisionObjects ();
-				} else {
-					RemoveCollisionObjects ();
-				}
 				return true;
 			}
 			return false;
-		}
-		/// <summary>
-		/// Adds the collision objects.
-		/// </summary>
-		protected void AddCollisionObjects () {
-			List<BroccoTree.Branch> rootBranches = tree.branches;
-			Vector3 trunkBase;
-			Vector3 trunkTip;
-			RemoveCollisionObjects ();
-			for (int i = 0; i < rootBranches.Count; i++) {
-				CapsuleCollider capsuleCollider = tree.obj.AddComponent<CapsuleCollider> ();
-				capsuleCollider.radius = rootBranches [i].maxGirth / 2f;
-				trunkBase = rootBranches [i].GetPointAtPosition (0f);
-				trunkTip = rootBranches [i].GetPointAtPosition (1f);
-				capsuleCollider.height = Vector3.Distance (trunkTip, trunkBase);
-				capsuleCollider.center = (trunkTip + trunkBase) / 2f;
-			}
-		}
-		/// <summary>
-		/// Removes the collision objects.
-		/// </summary>
-		protected void RemoveCollisionObjects () {
-			List<CapsuleCollider> capsuleColliders = new List<CapsuleCollider> ();
-			tree.obj.GetComponents<CapsuleCollider> (capsuleColliders);
-			if (capsuleColliders.Count > 0) {
-				for (int i = 0; i < capsuleColliders.Count; i++) {
-					Object.DestroyImmediate (capsuleColliders [i]);
-				}
-			}
-			capsuleColliders.Clear ();
 		}
 		#endregion
 	}

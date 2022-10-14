@@ -55,6 +55,7 @@ namespace Broccoli.Component
 			bool useLocalCache = false, 
 			TreeFactoryProcessControl processControl = null) 
 		{
+			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
 			sproutMeshBuilder = SproutMeshBuilder.GetInstance ();
 			advancedSproutMeshBuilder = AdvancedSproutMeshBuilder.GetInstance ();
 

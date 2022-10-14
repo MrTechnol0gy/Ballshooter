@@ -137,21 +137,23 @@ namespace Broccoli.TreeNodeEditor
 			if (EditorGUI.EndChangeCheck ()) {
 				curveChanged = true;
 			}
+			EditorGUILayout.Space ();
 
-			ApplySerialized ();
+			// Seed options.
+			DrawSeedOptions ();
 
 			if (girthChanged ||
 				curveChanged ||
 				girthAtRootBase != propGirthAtRootBase.floatValue ||
 				girthAtRootBottom != propGirthAtRootBottom.floatValue ||
-				rootCurveChanged || hierarchyScaleChanged) {
+				rootCurveChanged || hierarchyScaleChanged)
+			{
+				ApplySerialized ();
 				UpdatePipeline (GlobalSettings.processingDelayHigh);
 				girthTransformNode.GirthTransformElement.Validate ();
 				SetUndoControlCounter ();
 
 			}
-			EditorGUILayout.Space ();
-			EditorGUILayout.Space ();
 
 			// Field descriptors option.
 			DrawFieldHelpOptions ();

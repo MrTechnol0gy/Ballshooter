@@ -36,7 +36,7 @@ namespace Broccoli.TreeNodeEditor
 		/// <summary>
 		/// Saves the selected option on the node editor.
 		/// </summary>
-		public int selectedToolbar = 0;
+		public int selectedToolbarOption = 0;
 		public bool showSectionSize = true;
 		public bool showSectionScale = true;
 		public bool showSectionHorizontalAlign = true;

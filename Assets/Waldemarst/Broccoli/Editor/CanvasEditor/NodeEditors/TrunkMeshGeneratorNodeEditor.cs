@@ -131,6 +131,10 @@ namespace Broccoli.TreeNodeEditor
 				EditorGUILayout.Slider (propLengthResolutionFactor, 1f, 4f, "Length Resolution Factor");
 				ShowHelpBox (MSG_LENGTH_RESOLUTION_FACTOR);
 			}
+			EditorGUILayout.Space ();
+
+			// Seed options.
+			DrawSeedOptions ();
 
 			if (EditorGUI.EndChangeCheck () &&
 				propMinSpread.floatValue <= propMaxSpread.floatValue) {
@@ -139,7 +143,6 @@ namespace Broccoli.TreeNodeEditor
 				NodeEditorFramework.NodeEditor.RepaintClients ();
 				SetUndoControlCounter ();
 			}
-			EditorGUILayout.Space ();
 
 			// Field descriptors option.
 			DrawFieldHelpOptions ();

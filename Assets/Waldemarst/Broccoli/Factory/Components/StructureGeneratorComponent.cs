@@ -44,7 +44,6 @@ namespace Broccoli.Component
 			TreeFactoryProcessControl processControl = null) 
 		{
 			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
-			structureGeneratorElement.PrepareSeed ();
 			structureGeneratorElement.rootStructureLevel.structureLevels = structureGeneratorElement.structureLevels;
 			generator.useParentStructureRandomState = useLocalCache;
 			//generator.useParentStructureRandomState = true;

@@ -72,7 +72,17 @@ namespace Broccoli.Utils
 		/// <summary>
 		/// Rect to be filled by the splits.
 		/// </summary>
-		Rect availableRect;
+		Rect _availableRect;
+		public Rect availableRect {
+			get { return _availableRect; }
+		}
+		/// <summary>
+		/// Current split rect.
+		/// </summary>
+		Rect _currentRect = new Rect ();
+		public Rect currentRect {
+			get { return _currentRect; }
+		}
 		/// <summary>
 		/// Index of the split being drawn.
 		/// </summary>
@@ -268,8 +278,8 @@ namespace Broccoli.Utils
 				availablePxSize = tempRect.height;
 			}
 			if (tempRect.width > 0.0f) {
-				if (tempRect != availableRect) {
-					availableRect = tempRect;
+				if (tempRect != _availableRect) {
+					_availableRect = tempRect;
 					isCalculated = false;
 				}
 			}
@@ -277,6 +287,21 @@ namespace Broccoli.Utils
 			CalculateSizesAndLimits (availablePxSize);
 			currentSplitIndex = 0;
 			BeginSplit ();
+		}
+		private void SetCurrentRect (int splitIndex) {
+			SplitDef split = splits [splitIndex];
+			_currentRect = _availableRect;
+			if (splitDirection == Direction.Horizontal) {
+				_currentRect.width = _availableRect.width * splits [splitIndex].size;
+				if (splitIndex > 0) {
+					//_currentRect.x += limits [splitIndex - 1] * _availableRect.width;
+				}
+			} else {
+				_currentRect.height = _availableRect.height * splits [splitIndex].size;
+				if (splitIndex > 0) {
+					//_currentRect.y += limits [splitIndex - 1] * _availableRect.height;
+				}
+			}
 		}
 		/// <summary>
 		/// Calculates the sizes and limits used for each split.
@@ -393,6 +418,7 @@ namespace Broccoli.Utils
 		/// </summary>
 		void BeginSplit () {
 			SplitDef splitDef = splits[currentSplitIndex];
+			SetCurrentRect (currentSplitIndex);
 			if(splitDirection == Direction.Horizontal) {
 				splitDef.tempScrollPosition = 
 					GUILayout.BeginScrollView (splitDef.tempScrollPosition, 
@@ -434,9 +460,9 @@ namespace Broccoli.Utils
 		/// <returns>Number of pixels available. If horizontal then width; if vertical, height.</returns>
 		private float GetAvailableSize () {
 			if (splitDirection == Direction.Horizontal) {
-				return availableRect.width;
+				return _availableRect.width;
 			} else {
-				return availableRect.height;
+				return _availableRect.height;
 			}
 		}
 		/// <summary>
@@ -449,10 +475,10 @@ namespace Broccoli.Utils
 			}
 			Rect resizeHandleRect;
 			if (splitDirection == Direction.Horizontal) {
-				resizeHandleRect = new Rect (limits[currentSplitIndex] * availableRect.width, availableRect.y, 4f, availableRect.height);
+				resizeHandleRect = new Rect (limits[currentSplitIndex] * _availableRect.width, _availableRect.y, 4f, _availableRect.height);
 				resizeHandleRect.x -= 3;
 			} else {
-				resizeHandleRect = new Rect (availableRect.x, limits[currentSplitIndex] * availableRect.height, availableRect.width, 4f);
+				resizeHandleRect = new Rect (_availableRect.x, limits[currentSplitIndex] * _availableRect.height, _availableRect.width, 4f);
 				resizeHandleRect.y -= 3;
 			}
 
@@ -467,9 +493,9 @@ namespace Broccoli.Utils
 			if (resizeIndex == currentSplitIndex && Event.current.type == EventType.Repaint) {
 				float newLimit;
 				if (splitDirection == Direction.Horizontal) {
-					newLimit = Event.current.mousePosition.x / availableRect.width;
+					newLimit = Event.current.mousePosition.x / _availableRect.width;
 				} else {
-					newLimit = Event.current.mousePosition.y / availableRect.height;
+					newLimit = Event.current.mousePosition.y / _availableRect.height;
 				}
 				splitChanged = ApplyLimit (currentSplitIndex, newLimit);
 			}

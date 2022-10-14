@@ -275,35 +275,40 @@ namespace Broccoli.BroccoEditor
 		#region Sprout Lab
 		void InitSproutLab () {
 			sproutLabEditor = new SproutLabEditor ();
-			sproutLabEditor.onBeforeBranchDescriptorChange -= OnSproutLabBeforeChange;
-			sproutLabEditor.onBeforeBranchDescriptorChange += OnSproutLabBeforeChange;
-			sproutLabEditor.onBranchDescriptorChange -= OnSproutLabChange;
-			sproutLabEditor.onBranchDescriptorChange += OnSproutLabChange;
-			sproutLabEditor.onBeforeVariationDescriptorChange -= OnSproutLabBeforeChange;
-			sproutLabEditor.onBeforeVariationDescriptorChange += OnSproutLabBeforeChange;
-			sproutLabEditor.onVariationDescriptorChange -= OnSproutLabChange;
-			sproutLabEditor.onVariationDescriptorChange += OnSproutLabChange;
+			sproutLabEditor.onBeforeEditBranchDescriptor -= OnSproutLabBeforeChange;
+			sproutLabEditor.onBeforeEditBranchDescriptor += OnSproutLabBeforeChange;
+			sproutLabEditor.onEditBranchDescriptor -= OnSproutLabChange;
+			sproutLabEditor.onEditBranchDescriptor += OnSproutLabChange;
+			sproutLabEditor.onBeforeEditVariationDescriptor -= OnSproutLabBeforeChange;
+			sproutLabEditor.onBeforeEditVariationDescriptor += OnSproutLabBeforeChange;
+			sproutLabEditor.onEditVariationDescriptor -= OnSproutLabChange;
+			sproutLabEditor.onEditVariationDescriptor += OnSproutLabChange;
 			sproutLabEditor.onShowNotification -= OnShowNotification;
 			sproutLabEditor.onShowNotification += OnShowNotification;
 		}
 		void OnSproutLabBeforeChange (BranchDescriptorCollection branchDescriptorCollection) {
 			Undo.SetCurrentGroupName( "Branch Descriptor Change" );
-			Undo.RecordObject (sproutFactory.localPipeline, "Branch Descriptor Changed");
+			Undo.RegisterCompleteObjectUndo (sproutFactory, "Branch Descriptor Changed");
 			//Undo.RegisterCompleteObjectUndo (treeFactory.localPipeline, "Branch Descriptor Changed");
 		}
 		void OnSproutLabChange (BranchDescriptorCollection branchDescriptorCollection) {
 			int group = Undo.GetCurrentGroup();
 			Undo.CollapseUndoOperations( group );
 			sproutFactory.branchDescriptorCollection = branchDescriptorCollection;
-			sproutFactory.localPipeline.undoControl.undoCount++;
+			//sproutFactory.localPipeline.undoControl.undoCount++;
 			EditorUtility.SetDirty (sproutFactory);
 		}
 		void OnSproutLabUndo () {
 			if (sproutLabEditor != null) {
+				sproutLabEditor.branchDescriptorCollection = sproutFactory.branchDescriptorCollection;
 				sproutFactory.branchDescriptorCollection.branchDescriptorIndex = sproutFactory.branchDescriptorCollection.lastBranchDescriptorIndex;
-				sproutLabEditor.SelectSnapshot (sproutFactory.branchDescriptorCollection.branchDescriptorIndex);
-				sproutLabEditor.ReflectChangesToPipeline ();
-				sproutLabEditor.RegeneratePreview ();
+				sproutFactory.branchDescriptorCollection.variationDescriptorIndex = sproutFactory.branchDescriptorCollection.lastVariationDescriptorIndex;
+				if (sproutLabEditor.canvasStructureView == SproutLabEditor.CanvasStructureView.Snapshot) {
+					sproutLabEditor.ReflectChangesToPipeline ();
+					sproutLabEditor.RegeneratePreview ();
+				}
+				sproutLabEditor.OnUndoRedo ();
+				Repaint ();
 			}
 		}
 		void OnShowNotification (string notification) {

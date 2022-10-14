@@ -41,6 +41,7 @@ namespace Broccoli.Component
 			TreeFactoryProcessControl processControl = null)
 		{
 			SaveRandomState ();
+			pipelineElement.PrepareSeed ();
 			/*
 			if (processControl != null && processControl.lodIndex == 1) {
 				SaveRandomState ();

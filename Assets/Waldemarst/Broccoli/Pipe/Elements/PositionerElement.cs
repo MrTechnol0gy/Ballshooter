@@ -59,10 +59,6 @@ namespace Broccoli.Pipe {
 		/// Temp variable to save enabled positions when requesting one.
 		/// </summary>
 		List<Position> enabledPositions = new List<Position> ();
-		/// <summary>
-		/// Option to add a collision object at trunk level.
-		/// </summary>
-		public bool addCollisionObjectAtTrunk = false;
 		#endregion
 
 		#region Constructors
@@ -145,7 +141,6 @@ namespace Broccoli.Pipe {
 				clone.positions.Add (positions[i].Clone ());
 			}
 			clone.selectedPositionIndex = selectedPositionIndex;
-			clone.addCollisionObjectAtTrunk = addCollisionObjectAtTrunk;
 			return clone;
 		}
 		#endregion

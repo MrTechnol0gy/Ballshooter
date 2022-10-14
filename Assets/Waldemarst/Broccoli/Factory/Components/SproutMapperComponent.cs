@@ -50,7 +50,7 @@ namespace Broccoli.Component
 			bool useLocalCache = false, 
 			TreeFactoryProcessControl processControl = null) 
 		{
-			sproutMapperElement.PrepareSeed ();
+			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
 			// Gather all SproutGroup objects from elements upstream.
 			List<PipelineElement> sproutMeshGenerators = 
 				sproutMapperElement.GetUpstreamElements(PipelineElement.ClassType.SproutMeshGenerator);

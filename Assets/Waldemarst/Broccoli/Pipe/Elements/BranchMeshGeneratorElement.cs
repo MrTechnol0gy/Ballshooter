@@ -321,8 +321,6 @@ namespace Broccoli.Pipe {
 
 		#region GUI Vars
 		[System.NonSerialized]
-		public int selectedToolbar = 0;
-		[System.NonSerialized]
 		public bool showSectionBranchWelding = true;
 		[System.NonSerialized]
 		public bool showSectionRootWelding = true;

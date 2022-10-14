@@ -321,7 +321,11 @@ namespace Broccoli.Factory
                     // Pass Values.
                     branchSL.minFrequency = branchLD.minFrequency;
                     branchSL.maxFrequency = branchLD.maxFrequency;
-                    branchSL.radius = branchLD.radius;
+                    if (branchDescriptorCollection.descriptorImplId == 0) {
+                        branchSL.radius = 0;
+                    } else {
+                        branchSL.radius = branchLD.radius;
+                    }
                     branchSL.minLengthAtBase = branchLD.minLengthAtBase;
                     branchSL.maxLengthAtBase = branchLD.maxLengthAtBase;
                     branchSL.minLengthAtTop = branchLD.minLengthAtTop;
@@ -1338,6 +1342,8 @@ namespace Broccoli.Factory
                 texture = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D> (filename);
             }
             return texture;
+            #else
+            return null;
 			#endif
 		}
         void CleanTextures (List<Texture2D> texturesToClean) {

@@ -62,9 +62,13 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		[SerializeField]
 		public List<VariationDescriptor> variationDescriptors = new List<VariationDescriptor> ();
+		[SerializeField]
 		public int branchDescriptorIndex = -1;
+		[SerializeField]
 		public int lastBranchDescriptorIndex = -1;
+		[SerializeField]
 		public int variationDescriptorIndex = -1;
+		[SerializeField]
 		public int lastVariationDescriptorIndex = -1;
 		#endregion
 

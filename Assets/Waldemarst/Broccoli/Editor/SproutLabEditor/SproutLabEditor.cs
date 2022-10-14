@@ -56,6 +56,7 @@ namespace Broccoli.BroccoEditor
 			public bool displayExportDescriptor = true;
 			public bool displayExportPrefab = false;
 			public bool displayExportTextures = true;
+			public bool hasCustomPanels = false;
 		}
 		#endregion
 
@@ -72,7 +73,6 @@ namespace Broccoli.BroccoEditor
 		SproutCatalog catalog;
 		Color defaultPreviewBackgroundColor = new Color (0.35f, 0.35f, 0.35f, 1f);
 		Color graySkyPreviewBackgroundColor = new Color (0.28f, 0.38f, 0.47f);
-		//Color normalPreviewBackgroundColor = new Color(0.5f, 0.5f, 1.0f, 1.0f);
 		Color normalPreviewBackgroundColor = new Color(0.5f, 0.5f, 1.0f, 1.0f);
 		Color extrasPreviewBackgroundColor = new Color(0f, 0f, 0f, 1.0f);
 		Color subsurfacePreviewBackgroundColor = new Color(0f, 0f, 0f, 1.0f);
@@ -134,16 +134,26 @@ namespace Broccoli.BroccoEditor
 		#region Delegates and Events
 		public delegate void BranchDescriptorCollectionChange (BranchDescriptorCollection branchDescriptorCollection);
 		public delegate void ShowNotification (string notification);
-		public BranchDescriptorCollectionChange onBeforeBranchDescriptorChange;
-		public BranchDescriptorCollectionChange onBranchDescriptorChange;
-		public BranchDescriptorCollectionChange onBeforeVariationDescriptorChange;
-		public BranchDescriptorCollectionChange onVariationDescriptorChange;
+		public BranchDescriptorCollectionChange onBeforeEditBranchDescriptor;
+		public BranchDescriptorCollectionChange onEditBranchDescriptor;
+		public BranchDescriptorCollectionChange onBeforeEditVariationDescriptor;
+		public BranchDescriptorCollectionChange onEditVariationDescriptor;
 		public ShowNotification onShowNotification;
+		public void TriggerOnBeforeEditBranchDescriptor () { onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection); }
+		public void TriggerOnEditBranchDescriptor () { onEditBranchDescriptor?.Invoke (branchDescriptorCollection); }
+		public void TriggerOnBeforeEditVariationDescriptor () { onBeforeEditVariationDescriptor?.Invoke (branchDescriptorCollection); }
+		public void TriggerOnEditVariationDescriptor () { onEditVariationDescriptor?.Invoke (branchDescriptorCollection); }
 		#endregion
 
 		#region GUI Vars
 		Rect currentRect;
 		private EditorGUISplitView verticalSplitView;
+		public Rect splitRect {
+			get { return verticalSplitView.currentRect; }
+		}
+		public Rect windowRect {
+			get { return verticalSplitView.availableRect; }
+		}
 		public enum ViewMode {
 			SelectMode,
 			Structure,
@@ -215,8 +225,8 @@ namespace Broccoli.BroccoEditor
 		bool branchMapFoldout = true;
 		bool sproutAMapFoldout = true;
 		bool sproutBMapFoldout = true;
-		BranchDescriptor selectedBranchDescriptor = null;
-		VariationDescriptor selectedVariationDescriptor = null;
+		public BranchDescriptor selectedBranchDescriptor = null;
+		public VariationDescriptor selectedVariationDescriptor = null;
 		BranchDescriptor.BranchLevelDescriptor selectedBranchLevelDescriptor;
 		BranchDescriptor.SproutLevelDescriptor selectedSproutALevelDescriptor;
 		BranchDescriptor.SproutLevelDescriptor selectedSproutBLevelDescriptor;
@@ -438,8 +448,10 @@ namespace Broccoli.BroccoEditor
 		private static string MSG_LOAD_CATALOG_ITEM_MESSAGE = "Do you really want to load this sprout template? (Unsaved settings will be lost).";
 		private static string MSG_LOAD_CATALOG_ITEM_OK = "Yes";
 		private static string MSG_LOAD_CATALOG_ITEM_CANCEL = "No";
-		private static string MSG_EMPTY_SNAPSHOTS = "No Snapshots found; you need to have at least one Variation to export them to prefabs.";
+		private static string MSG_NO_SELECTION = "No Snapshot or Variation selected.\nSelect one to display it here.";
+		private static string MSG_EMPTY_SNAPSHOTS = "No Snapshots found; you need to have at least one Snapshot to export them to prefabs.";
 		private static string MSG_EMPTY_VARIATIONS = "No Variations found; you need to have at least one Variation to export them to prefabs.";
+		private static string MSG_NO_SNAPSHOT_PANEL = "No Snapshot has been selected on this Structure Collection. Select one to modify its settings.";
 		#endregion
 
 		#region Constructor and Initialization
@@ -671,9 +683,11 @@ namespace Broccoli.BroccoEditor
 
 				// Set the editor view mode.
 				viewMode = ViewMode.Structure;
+				/*
 				if (this.branchDescriptorCollection.branchDescriptors.Count == 0) {
 					branchDescriptorCollection.AddBranchDescriptor (new BranchDescriptor ());
 				}
+				*/
 				sproutSubfactory.onReportProgress -= OnReportProgress;
 				sproutSubfactory.onReportProgress += OnReportProgress;
 				sproutSubfactory.onFinishProgress -= OnFinishProgress;
@@ -969,9 +983,9 @@ namespace Broccoli.BroccoEditor
 		public void DrawStructureViewHeader (Rect windowRect) {
 			GUILayout.BeginHorizontal ();
 			if (GUILayout.Button (generateNewStructureGUI)) {
-				onBeforeBranchDescriptorChange (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor (branchDescriptorCollection);
 				sproutSubfactory.ProcessSnapshot (true, SproutSubfactory.MaterialMode.Composite, true);
-				onBranchDescriptorChange (branchDescriptorCollection);
+				onEditBranchDescriptor (branchDescriptorCollection);
 				ShowPreviewMesh ();
 			}
 			if (GUILayout.Button (regenerateCurrentGUI)) {
@@ -1012,9 +1026,9 @@ namespace Broccoli.BroccoEditor
 
 					if (areaCanvas.HasChanged ()) {
 						branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-						onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 						areaCanvas.ApplyChanges (selectedSproutMap);
-						onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 						meshPreview.backgroundColor = defaultPreviewBackgroundColor;
 					}
 				}
@@ -1054,7 +1068,7 @@ namespace Broccoli.BroccoEditor
 			rect.y = rect.height / 2f;
 			rect.height = EditorGUIUtility.singleLineHeight * 2;
 			rect.width = 220;
-			EditorGUI.HelpBox (rect, "No Snapshot or Variation selected.\nSelect one to display it here.", MessageType.Info);
+			EditorGUI.HelpBox (rect, MSG_NO_SELECTION, MessageType.Info);
 		}
 		/// <summary>
 		/// Editor View Mode for when the Sprout Factory is displaying the template catalog.
@@ -1115,6 +1129,31 @@ namespace Broccoli.BroccoEditor
 			if (currentStructureSettings.variantsEnabled) {
 				DrawVariationsPanel ();
 			}
+			// Custom panel per editor implementation.
+			if (currentStructureSettings.hasCustomPanels) {
+				currentImplementation.DrawPanels ();
+			}
+			// Default structure collection panels.
+			else {
+				DrawDefaultPanels ();	
+			}
+		}
+		#endregion
+
+		#region Structure Panel
+		public void DrawEmptyPanel (string msg) {
+			Rect rect = new Rect (splitRect);
+			rect.x = rect.width / 2f - 120;
+			rect.y = rect.y + (rect.height / 2f);
+			rect.height = EditorGUIUtility.singleLineHeight * 2;
+			rect.width = 300;
+			EditorGUI.HelpBox (rect, msg, MessageType.Warning);
+		}
+		public void DrawDefaultPanels () {
+			if (selectedBranchDescriptor == null) {
+                DrawEmptyPanel (MSG_NO_SNAPSHOT_PANEL);
+                return;
+            }
 			int _currentPanelSection = GUILayout.Toolbar (currentPanelSection, panelSectionOption, GUI.skin.button);
 			if (_currentPanelSection != currentPanelSection) {
 				currentPanelSection = _currentPanelSection;
@@ -1141,9 +1180,6 @@ namespace Broccoli.BroccoEditor
 					break;
 			}
 		}
-		#endregion
-
-		#region Structure Panel
 		/// <summary>
 		/// Draw the structure panel window view.
 		/// </summary>
@@ -1283,7 +1319,7 @@ namespace Broccoli.BroccoEditor
 			EditorGUILayout.EndHorizontal ();
 			if (changed) {
 				branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-				onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				CopyFromProxyBranchLevelDescriptor ();
 				CopyFromProxySproutALevelDescriptor ();
 				CopyFromProxySproutBLevelDescriptor ();
@@ -1302,7 +1338,7 @@ namespace Broccoli.BroccoEditor
 				selectedBranchDescriptor.sproutBScaleAtBase = sproutBScaleAtBase;
 				selectedBranchDescriptor.sproutBScaleAtTop = sproutBScaleAtTop;
 				selectedBranchDescriptor.sproutBFlipAlign = sproutBFlipAlign;
-				onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				ReflectChangesToPipeline ();
 				RegeneratePreview ();
 			}
@@ -1560,7 +1596,7 @@ namespace Broccoli.BroccoEditor
 			EditorGUILayout.EndHorizontal ();
 			if (changed) {
 				branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-				onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				CopyFromProxyBranchLevelDescriptor ();
 				branchDescriptorCollection.branchAlbedoTexture = branchAlbedoTexture;
 				branchDescriptorCollection.branchNormalTexture = branchNormalTexture;
@@ -1568,7 +1604,7 @@ namespace Broccoli.BroccoEditor
 				if (sproutMapChanged && selectedSproutMap != null) {
 					CopyFromProxySproutMap ();
 				}
-				onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				ReflectChangesToPipeline ();
 				RegeneratePreview ();
 			}
@@ -1711,7 +1747,7 @@ namespace Broccoli.BroccoEditor
 			}
 
 			if (EditorGUI.EndChangeCheck ()) {
-				onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				branchDescriptorCollection.branchColorShade = branchColorShade;
 				branchDescriptorCollection.branchColorSaturation = branchColorSaturation;
 				branchDescriptorCollection.sproutStyleA.minColorShade = minColorShadeA;
@@ -1732,7 +1768,7 @@ namespace Broccoli.BroccoEditor
 				branchDescriptorCollection.sproutStyleB.glossiness = glossinessB;
 				branchDescriptorCollection.sproutStyleB.subsurfaceMul = subsurfaceMulB;
 				branchDescriptorCollection.sproutStyleB.colorSaturation = colorSaturationB;
-				onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				ReflectChangesToPipeline ();
 				RegeneratePreview (currentMapView);
 			}
@@ -1871,13 +1907,13 @@ namespace Broccoli.BroccoEditor
 					changed |= exportFlags != branchDescriptorCollection.exportTexturesFlags;
 					if (changed) {
 						branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-						onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 						branchDescriptorCollection.exportTextureSize = exportTextureSize;
 						branchDescriptorCollection.exportAtlasPadding = paddingSize;
 						branchDescriptorCollection.exportTake = exportTake;
 						branchDescriptorCollection.exportPrefix = exportPrefix;
 						branchDescriptorCollection.exportTexturesFlags = exportFlags;
-						onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 					}
 					break;
 				case EXPORT_PREFAB: // Texture.
@@ -1950,13 +1986,13 @@ namespace Broccoli.BroccoEditor
 					changed |= exportFlags != branchDescriptorCollection.exportTexturesFlags;
 					if (changed) {
 						branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-						onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 						branchDescriptorCollection.exportPrefix = exportPrefix;
 						branchDescriptorCollection.exportTextureSize = exportTextureSize;
 						branchDescriptorCollection.exportAtlasPadding = paddingSize;
 						branchDescriptorCollection.exportTake = exportTake;
 						branchDescriptorCollection.exportTexturesFlags = exportFlags;
-						onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 					}
 					
 					break;
@@ -2027,13 +2063,13 @@ namespace Broccoli.BroccoEditor
 					changed |= exportFlags != branchDescriptorCollection.exportTexturesFlags;
 					if (changed) {
 						branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-						onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 						branchDescriptorCollection.exportTextureSize = exportTextureSize;
 						branchDescriptorCollection.exportAtlasPadding = paddingSize;
 						branchDescriptorCollection.exportMode = exportMode;
 						branchDescriptorCollection.exportTake = exportTake;
 						branchDescriptorCollection.exportTexturesFlags = exportFlags;
-						onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+						onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 					}
 					break;
 			}
@@ -2185,6 +2221,14 @@ namespace Broccoli.BroccoEditor
 		#endregion
 
 		#region Undo
+		public void OnUndoRedo () {
+			if (canvasStructureView == CanvasStructureView.Snapshot) {
+				SelectSnapshot (branchDescriptorCollection.branchDescriptorIndex);
+			} else {
+				SelectVariation (branchDescriptorCollection.variationDescriptorIndex);
+			}
+			if (currentImplementation != null) currentImplementation.OnUndoRedo ();
+		}
 		void CopyToProxyBranchLevelDescriptor () {
 			proxyBranchLevelDescriptor.minFrequency = selectedBranchLevelDescriptor.minFrequency;
 			proxyBranchLevelDescriptor.maxFrequency = selectedBranchLevelDescriptor.maxFrequency;
@@ -2342,7 +2386,7 @@ namespace Broccoli.BroccoEditor
 			if (branchDescriptorCollection.branchDescriptors.Count > 0) {
 				branchDescriptorCollection.branchDescriptorIndex = GUILayout.Toolbar (branchDescriptorCollection.branchDescriptorIndex, snapshotViewOptions);
 			} else {
-				EditorGUILayout.HelpBox (MSG_EMPTY_SNAPSHOTS, MessageType.Warning, true);
+				EditorGUILayout.HelpBox (MSG_EMPTY_SNAPSHOTS, MessageType.None, true);
 			}
 			if (EditorGUI.EndChangeCheck ()) {
 				SelectSnapshot (branchDescriptorCollection.branchDescriptorIndex);
@@ -2365,11 +2409,16 @@ namespace Broccoli.BroccoEditor
 		/// </summary>
 		void AddSnapshot () {
 			if (branchDescriptorCollection.branchDescriptors.Count < 10) {
-				BranchDescriptor newBranchDescriptor = selectedBranchDescriptor.Clone ();
+				BranchDescriptor newBranchDescriptor;
+				if (selectedBranchDescriptor != null) {
+					newBranchDescriptor = selectedBranchDescriptor.Clone ();
+				} else {
+					newBranchDescriptor = new BranchDescriptor ();
+				}
 				branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-				onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				branchDescriptorCollection.AddBranchDescriptor (newBranchDescriptor);
-				onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				InitSnapshotViewOptions ();
 				SelectSnapshot (branchDescriptorCollection.branchDescriptors.Count - 1);
 				ReflectChangesToPipeline ();
@@ -2385,10 +2434,10 @@ namespace Broccoli.BroccoEditor
 				MSG_DELETE_BRANCH_DESC_OK, 
 				MSG_DELETE_BRANCH_DESC_CANCEL)) {
 				branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-				onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				branchDescriptorCollection.branchDescriptors.RemoveAt (branchDescriptorCollection.branchDescriptorIndex);
 				SelectSnapshot (0);
-				onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				GUIUtility.ExitGUI ();
 			}
 		}
@@ -2408,6 +2457,9 @@ namespace Broccoli.BroccoEditor
 				branchDescriptorCollection.branchDescriptorIndex = -1;
 				this.selectedBranchDescriptor = null;
 				this.sproutSubfactory.branchDescriptorIndex = -1;
+			}
+			if (currentImplementation != null) {
+				currentImplementation.SnapshotSelected (branchDescriptorCollection.branchDescriptorIndex);
 			}
 			InitLODViewOptions ();
 		}
@@ -2440,7 +2492,7 @@ namespace Broccoli.BroccoEditor
 			if (branchDescriptorCollection.variationDescriptors.Count > 0) {
 				branchDescriptorCollection.variationDescriptorIndex = GUILayout.Toolbar (branchDescriptorCollection.variationDescriptorIndex, variationViewOptions);
 			} else {
-				EditorGUILayout.HelpBox (MSG_EMPTY_VARIATIONS, MessageType.Warning, true);
+				EditorGUILayout.HelpBox (MSG_EMPTY_VARIATIONS, MessageType.None, true);
 			}
 			if (EditorGUI.EndChangeCheck ()) {
 				SelectVariation (branchDescriptorCollection.variationDescriptorIndex);
@@ -2469,9 +2521,9 @@ namespace Broccoli.BroccoEditor
 					newVariationDescriptor = new VariationDescriptor ();
 				}
 				branchDescriptorCollection.lastVariationDescriptorIndex = branchDescriptorCollection.variationDescriptorIndex;
-				onBeforeVariationDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditVariationDescriptor?.Invoke (branchDescriptorCollection);
 				branchDescriptorCollection.AddVariationDescriptor (newVariationDescriptor);
-				onVariationDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditVariationDescriptor?.Invoke (branchDescriptorCollection);
 				InitVariationViewOptions ();
 				SelectVariation (branchDescriptorCollection.variationDescriptors.Count - 1);
 				RegeneratePreview ();
@@ -2486,10 +2538,10 @@ namespace Broccoli.BroccoEditor
 				MSG_DELETE_VARIATION_DESC_OK, 
 				MSG_DELETE_VARIATION_DESC_CANCEL)) {
 				branchDescriptorCollection.lastVariationDescriptorIndex = branchDescriptorCollection.variationDescriptorIndex;
-				onBeforeVariationDescriptorChange?.Invoke (branchDescriptorCollection);
+				onBeforeEditVariationDescriptor?.Invoke (branchDescriptorCollection);
 				branchDescriptorCollection.variationDescriptors.RemoveAt (branchDescriptorCollection.variationDescriptorIndex);
 				SelectVariation (0);
-				onVariationDescriptorChange?.Invoke (branchDescriptorCollection);
+				onEditVariationDescriptor?.Invoke (branchDescriptorCollection);
 				GUIUtility.ExitGUI ();
 			}
 		}
@@ -2510,7 +2562,9 @@ namespace Broccoli.BroccoEditor
 				this.selectedVariationDescriptor = null;
 				this.sproutSubfactory.variationDescriptorIndex = -1;
 			}
-			//InitLODViewOptions ();
+			if (currentImplementation != null) {
+				currentImplementation.VariationSelected (branchDescriptorCollection.variationDescriptorIndex);
+			}
 		}
 		#endregion
 
@@ -2895,12 +2949,12 @@ namespace Broccoli.BroccoEditor
 		/// <param name="loadedBranchDescriptorCollection">Branch collection loaded.</param>
 		/// <param name="pathToFile">Path to file.</param>
 		private void OnLoadBranchDescriptorCollectionSO (BranchDescriptorCollectionSO loadedBranchDescriptorCollectionSO, string pathToFile) {
-			onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 			// TEMP TODO: remove.
 			loadedBranchDescriptorCollectionSO.branchDescriptorCollection.descriptorImplId = 0;
 
 			LoadBranchDescriptorCollection (loadedBranchDescriptorCollectionSO.branchDescriptorCollection.Clone (), sproutSubfactory);
-			onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 			/*
 			rockFactory.localPipeline = loadedBranchDescriptorCollection;
 			rockFactory.localPipelineFilepath = pathToFile;
@@ -3004,14 +3058,14 @@ namespace Broccoli.BroccoEditor
 		/// <param name="list">List.</param>
 		private void AddSproutAMapListItem (ReorderableList list) {
 			branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-			onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 			if (branchDescriptorCollection.sproutAMapAreas.Count < 10) {
 				SproutMap.SproutMapArea sproutMapArea= new SproutMap.SproutMapArea ();
 				branchDescriptorCollection.sproutAMapAreas.Add (sproutMapArea);
 				BranchDescriptorCollection.SproutMapDescriptor sproutMapDescriptor = new BranchDescriptorCollection.SproutMapDescriptor ();
 				branchDescriptorCollection.sproutAMapDescriptors.Add (sproutMapDescriptor);
 			}
-			onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 		}
 		/// <summary>
 		/// Removes the sprout map list item.
@@ -3025,11 +3079,11 @@ namespace Broccoli.BroccoEditor
 					MSG_DELETE_SPROUT_MAP_OK, 
 					MSG_DELETE_SPROUT_MAP_CANCEL)) {
 					branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-					onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+					onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 					branchDescriptorCollection.sproutAMapAreas.RemoveAt (list.index);
 					selectedSproutMap = null;
 					selectedSproutMapDescriptor = null;
-					onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+					onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				}
 			}
 		}
@@ -3073,14 +3127,14 @@ namespace Broccoli.BroccoEditor
 		/// <param name="list">List.</param>
 		private void AddSproutBMapListItem (ReorderableList list) {
 			branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-			onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 			if (branchDescriptorCollection.sproutBMapAreas.Count < 10) {
 				SproutMap.SproutMapArea sproutMapArea= new SproutMap.SproutMapArea ();
 				branchDescriptorCollection.sproutBMapAreas.Add (sproutMapArea);
 				BranchDescriptorCollection.SproutMapDescriptor sproutMapDescriptor = new BranchDescriptorCollection.SproutMapDescriptor ();
 				branchDescriptorCollection.sproutBMapDescriptors.Add (sproutMapDescriptor);
 			}
-			onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+			onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 		}
 		/// <summary>
 		/// Removes the sprout map list item.
@@ -3094,10 +3148,10 @@ namespace Broccoli.BroccoEditor
 					MSG_DELETE_SPROUT_MAP_OK, 
 					MSG_DELETE_SPROUT_MAP_CANCEL)) {
 					branchDescriptorCollection.lastBranchDescriptorIndex = branchDescriptorCollection.branchDescriptorIndex;
-					onBeforeBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+					onBeforeEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 					branchDescriptorCollection.sproutBMapAreas.RemoveAt (list.index);
 					selectedSproutMap = null;
-					onBranchDescriptorChange?.Invoke (branchDescriptorCollection);
+					onEditBranchDescriptor?.Invoke (branchDescriptorCollection);
 				}
 			}
 		}

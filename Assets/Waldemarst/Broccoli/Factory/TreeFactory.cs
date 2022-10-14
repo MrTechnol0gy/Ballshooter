@@ -457,7 +457,6 @@ namespace Broccoli.Factory
 		private static string MSG_PIPELINE_INVALID_CONNECTION = "Some invalid connections found, please correct them.";
 		private static string MSG_MESHDATA_UNASSIGNED = "Found some submeshes without data associated to them on the final merged mesh.";
 		private static string MSG_MATERIALS_UNASSIGNED = "Some submeshes (sprout or branch) have no material associated.";
-		private static string MSG_CUSTOM_MATERIAL_NO_WINDZONE = "This tree have custom materials. WindZone support depends on the material itself.";
 		#endregion
 
 		#region Events

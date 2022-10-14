@@ -30,7 +30,10 @@ namespace Broccoli.TreeNodeEditor
 		/// <summary>
 		/// Options to show on the toolbar.
 		/// </summary>
-		string[] toolBarOptions = new string[] {"LODs", "Welding", "Shape"};
+		static string[] toolbarOptions = new string[] {"LODs", "Welding", "Shape"};
+		static int OPTION_LOD = 0;
+		static int OPTION_WELDING = 1;
+		static int OPTION_SHAPE = 2;
 		/// <summary>
 		/// Shape catalog.
 		/// </summary>
@@ -227,41 +230,14 @@ namespace Broccoli.TreeNodeEditor
 
 			bool changeCheck = false;
 
-			branchMeshGeneratorElement.selectedToolbar = GUILayout.Toolbar (branchMeshGeneratorElement.selectedToolbar, toolBarOptions);
+			branchMeshGeneratorNode.selectedToolbarOption = GUILayout.Toolbar (branchMeshGeneratorNode.selectedToolbarOption, toolbarOptions);
 			EditorGUILayout.Space ();
 
-			if (branchMeshGeneratorElement.selectedToolbar == 0) {
+			if (branchMeshGeneratorNode.selectedToolbarOption == OPTION_LOD) {
 				lodList.DoLayout ();
 				EditorGUILayout.Space ();
 				lodList.DrawLODsBar ("");
-				/*
-				EditorGUI.indentLevel++;
-				EditorGUI.BeginChangeCheck ();
-
-				int maxPolygonSides = propMaxPolygonSides.intValue;
-				EditorGUILayout.IntSlider (propMaxPolygonSides, 3, 16, "Max Polygon Sides");
-				ShowHelpBox (MSG_MAX_POLYGON_SIDES);
-
-				int minPolygonSides = propMinPolygonSides.intValue;
-				EditorGUILayout.IntSlider (propMinPolygonSides, 3, 16, "Min Polygon Sides");
-				ShowHelpBox (MSG_MIN_POLYGON_SIDES);
-
-				float maxBranchCurveResolution = propMaxBranchCurveResolution.floatValue;
-				EditorGUILayout.Slider (propMaxBranchCurveResolution, 0, 1, "Max Branch Resolution");
-				ShowHelpBox (MSG_MAX_BRANCH_CURVE_RESOLUTION);
-
-				float minBranchCurveResolution = propMinBranchCurveResolution.floatValue;
-				EditorGUILayout.Slider (propMinBranchCurveResolution, 0, 1, "Min Branch Resolution");
-				ShowHelpBox (MSG_MIN_BRANCH_CURVE_RESOLUTION);
-
-				bool useMeshCapAtBase = propUseMeshCapAtBase.boolValue;
-				EditorGUILayout.PropertyField (propUseMeshCapAtBase);
-				ShowHelpBox (MSG_USE_MESH_CAP_AT_BASE);
-
-				if (EditorGUI.EndChangeCheck ()) changeCheck = true;
-				EditorGUI.indentLevel--;
-				*/
-			} else if (branchMeshGeneratorElement.selectedToolbar == 1) {
+			} else if (branchMeshGeneratorNode.selectedToolbarOption == OPTION_WELDING) {
 				if (GlobalSettings.experimentalBranchWelding) {
 					branchMeshGeneratorElement.showSectionBranchWelding = 
 						EditorGUILayout.BeginFoldoutHeaderGroup (branchMeshGeneratorElement.showSectionBranchWelding, "Branch Welding");
@@ -357,7 +333,7 @@ namespace Broccoli.TreeNodeEditor
 					branchMeshGeneratorNode.branchMeshGeneratorElement.Validate ();
 					SetUndoControlCounter ();
 				}
-			} else {
+			} else if (branchMeshGeneratorNode.selectedToolbarOption == OPTION_SHAPE) {
 				EditorGUI.BeginChangeCheck ();
 
 				// MESHING MODES
@@ -455,7 +431,8 @@ namespace Broccoli.TreeNodeEditor
 			}
 			EditorGUILayout.Space ();
 			*/
-	
+			// Seed options.
+			DrawSeedOptions ();
 			// Field descriptors option.
 			DrawFieldHelpOptions ();
 		}

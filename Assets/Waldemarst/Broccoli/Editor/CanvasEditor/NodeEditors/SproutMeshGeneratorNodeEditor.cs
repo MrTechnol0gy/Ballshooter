@@ -27,6 +27,12 @@ namespace Broccoli.TreeNodeEditor
 		/// </summary>
 		public SproutMeshGeneratorNode sproutMeshGeneratorNode;
 		/// <summary>
+		/// Options to show on the toolbar.
+		/// </summary>
+		static string[] toolbarOptions = new string[] {"Sprout Groups", "Mesh Data"};
+		static int OPTION_GROUPS = 0;
+		static int OPTION_DATA = 1;
+		/// <summary>
 		/// The meshes list.
 		/// </summary>
 		ReorderableList meshesList;
@@ -162,12 +168,12 @@ namespace Broccoli.TreeNodeEditor
 
 			UpdateSerialized ();
 
-			sproutMeshGeneratorNode.selectedToolbar = GUILayout.Toolbar (sproutMeshGeneratorNode.selectedToolbar, new string[] {"Sprout Groups", "Mesh Data"});
+			sproutMeshGeneratorNode.selectedToolbarOption = GUILayout.Toolbar (sproutMeshGeneratorNode.selectedToolbarOption, toolbarOptions);
 			EditorGUILayout.Space ();
 
 			EditorGUI.BeginChangeCheck ();
 
-			if (sproutMeshGeneratorNode.selectedToolbar == 0) {
+			if (sproutMeshGeneratorNode.selectedToolbarOption == OPTION_GROUPS) {
 				// Log box.
 				DrawLogBox ();
 				if (sproutMeshGeneratorNode.sproutMeshGeneratorElement.selectedMeshIndex != meshesList.index &&
@@ -175,7 +181,7 @@ namespace Broccoli.TreeNodeEditor
 					meshesList.index = sproutMeshGeneratorNode.sproutMeshGeneratorElement.selectedMeshIndex;
 				}
 				meshesList.DoLayoutList ();
-			} else {
+			} else if (sproutMeshGeneratorNode.selectedToolbarOption == OPTION_DATA) {
 				EditorGUILayout.PropertyField (propNormalMode);
 				ShowHelpBox (MSG_NORMAL_MODE);
 				if (propNormalMode.intValue != (int)SproutMeshGeneratorElement.NormalMode.PerSprout) {
@@ -184,6 +190,9 @@ namespace Broccoli.TreeNodeEditor
 				}
 			}
 			EditorGUILayout.Space ();
+
+			// Seed options.
+			DrawSeedOptions ();
 
 			if (EditorGUI.EndChangeCheck ()) {
 				ApplySerialized ();

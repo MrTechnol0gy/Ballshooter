@@ -114,6 +114,20 @@ namespace Broccoli.BroccoEditor {
         public SproutLabEditor.StructureSettings GetStructureSettings (int impId) {
             return structureSettings;
         }
+        /// <summary>
+        /// Called from the SproutLabEditor instance when a snapshot has been selected.
+        /// </summary>
+        /// <param name="index">Index of the snapshot selected.</param>
+        public void SnapshotSelected (int index) {}
+        /// <summary>
+        /// Called from the SproutLabEditor instance when a variation has been selected.
+        /// </summary>
+        /// <param name="index">Index of the variation selected.</param>
+        public void VariationSelected (int index) {}
+        /// <summary>
+        /// Called after an undo/redo action has been made on the editor.
+        /// </summary>
+        public void OnUndoRedo () {}
         #endregion
 
         #region Draw
@@ -136,6 +150,10 @@ namespace Broccoli.BroccoEditor {
 			}
 			EditorGUILayout.HelpBox (MSG_CREATE_FROM_TEMPLATE, MessageType.None);
         }
+        /// <summary>
+        /// Draws custom panels for the loaded structure collection.
+        /// </summary>
+        public void DrawPanels () {}
         #endregion
     }
 }

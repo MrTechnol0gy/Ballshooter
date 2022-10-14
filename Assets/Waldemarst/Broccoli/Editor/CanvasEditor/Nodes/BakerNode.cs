@@ -37,6 +37,11 @@ namespace Broccoli.TreeNodeEditor
 		public override string nodeName {
 			get { return "Baker"; }
 		}
+		/// <summary>
+		/// Selected toolbar option for the node.
+		/// </summary>
+		[System.NonSerialized]
+		public int selectedToolbarOption = 0;
 		#endregion
 
 		#region Base Node

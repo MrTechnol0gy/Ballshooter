@@ -32,7 +32,7 @@ namespace Broccoli.Component
 			bool useLocalCache = false, 
 			TreeFactoryProcessControl processControl = null) 
 		{
-			sparsingTransformElement.PrepareSeed ();
+			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
 		}
 		/// <summary>
 		/// Gets the changed aspects on the tree for this component.

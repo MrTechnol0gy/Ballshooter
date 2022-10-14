@@ -45,6 +45,7 @@ namespace Broccoli.Component
 		{
 			if (pipelineElement != null && tree != null) {
 				bakerElement = pipelineElement as BakerElement;
+				// AMBIENT OCCLUSION.
 				if (bakerElement.enableAO) {
 					bool enableAO = (ProcessControl.isPreviewProcess && bakerElement.enableAOInPreview) || ProcessControl.isRuntimeProcess || ProcessControl.isPrefabProcess;
 					if (enableAO) {
@@ -54,10 +55,17 @@ namespace Broccoli.Component
 					} else {
 						treeFactory.meshManager.enableAO = false;
 					}
-					return true;
+				} else {
+					treeFactory.meshManager.enableAO = false;
 				}
+				// COLLIDER.
+				if (bakerElement.addCollider) {
+					AddCollisionObjects (treeFactory);
+				} else {
+					RemoveCollisionObjects ();
+				}
+				return true;
 			}
-			treeFactory.meshManager.enableAO = false;
 			return false;
 		}
 		/// <summary>
@@ -80,6 +88,48 @@ namespace Broccoli.Component
 			}
 			treeFactory.assetManager.lodFadeAnimate = bakerElement.lodFadeAnimate;
 			treeFactory.assetManager.lodTransitionWidth = bakerElement.lodTransitionWidth;
+		}
+		/// <summary>
+		/// Adds the collision objects.
+		/// </summary>
+		/// <param name="treeFactory">Tree factory.</param>
+		protected void AddCollisionObjects (TreeFactory treeFactory) {
+			List<BroccoTree.Branch> rootBranches = tree.branches;
+			Vector3 trunkBase;
+			Vector3 trunkTip;
+			RemoveCollisionObjects ();
+			for (int i = 0; i < rootBranches.Count; i++) {
+				float scale = treeFactory.treeFactoryPreferences.factoryScale;
+				CapsuleCollider capsuleCollider = tree.obj.AddComponent<CapsuleCollider> ();
+				capsuleCollider.radius = rootBranches [i].maxGirth * bakerElement.colliderScale * scale;
+				trunkBase = rootBranches [i].GetPointAtPosition (0f);
+				trunkTip = rootBranches [i].GetPointAtPosition (1f);
+				capsuleCollider.height = Vector3.Distance (trunkTip, trunkBase) * scale;
+				capsuleCollider.center = (trunkTip + trunkBase) / 2f * scale;
+			}
+		}
+		/// <summary>
+		/// Removes the collision objects.
+		/// </summary>
+		protected void RemoveCollisionObjects () {
+			// Remove any capsule colliders.
+			List<CapsuleCollider> capsuleColliders = new List<CapsuleCollider> ();
+			tree.obj.GetComponents<CapsuleCollider> (capsuleColliders);
+			if (capsuleColliders.Count > 0) {
+				for (int i = 0; i < capsuleColliders.Count; i++) {
+					Object.DestroyImmediate (capsuleColliders [i]);
+				}
+			}
+			capsuleColliders.Clear ();
+			// Remove any mesh colliders.
+			List<MeshCollider> meshColliders = new List<MeshCollider> ();
+			tree.obj.GetComponents<MeshCollider> (meshColliders);
+			if (meshColliders.Count > 0) {
+				for (int i = 0; i < meshColliders.Count; i++) {
+					Object.DestroyImmediate (meshColliders [i]);
+				}
+			}
+			meshColliders.Clear ();
 		}
 		#endregion
 	}

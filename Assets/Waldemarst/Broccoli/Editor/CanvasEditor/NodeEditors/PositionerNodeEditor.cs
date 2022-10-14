@@ -27,7 +27,6 @@ namespace Broccoli.TreeNodeEditor
 		ReorderableList positionsList;
 		SerializedProperty propUseCustomPositions;
 		SerializedProperty propPositions;
-		SerializedProperty propAddCollisionObjectAtTrunk;
 		#endregion
 
 		#region Messages
@@ -37,7 +36,6 @@ namespace Broccoli.TreeNodeEditor
 		private static string MSG_POSITION_POSITION = "Actual position.";
 		private static string MSG_POSITION_OVERRIDE_DIRECTION = "If true then the tree spawning from this position takes a custom direction.";
 		private static string MSG_POSITION_DIRECTION = "Custom direction for the tree spawning from this position.";
-		private static string MSG_USE_COLLISION_OBJECTS = "Create collision objects at tree trunk level.";
 		#endregion
 
 		#region Events
@@ -59,8 +57,6 @@ namespace Broccoli.TreeNodeEditor
 			positionsList.onSelectCallback += OnSelectListItem;
 			positionsList.onAddCallback += OnAddListItem;
 			positionsList.onRemoveCallback += OnRemoveListItem;
-
-			propAddCollisionObjectAtTrunk = GetSerializedProperty ("addCollisionObjectAtTrunk");
 		}
 		/// <summary>
 		/// Raises the scene GUI event.
@@ -141,9 +137,6 @@ namespace Broccoli.TreeNodeEditor
 
 			EditorGUI.BeginChangeCheck ();
 
-			// Collision objects.
-			EditorGUILayout.PropertyField (propAddCollisionObjectAtTrunk);
-			ShowHelpBox (MSG_USE_COLLISION_OBJECTS);
 			EditorGUILayout.Space ();
 
 			// Seed options.

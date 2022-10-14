@@ -43,6 +43,20 @@ namespace Broccoli.BroccoEditor
         /// <param name="impId">Id of the implementation.</param>
         /// <returns>Structure settings.</returns>
         SproutLabEditor.StructureSettings GetStructureSettings (int impId);
+        /// <summary>
+        /// Called from the SproutLabEditor instance when a snapshot has been selected.
+        /// </summary>
+        /// <param name="index">Index of the snapshot selected.</param>
+        void SnapshotSelected (int index);
+        /// <summary>
+        /// Called from the SproutLabEditor instance when a variation has been selected.
+        /// </summary>
+        /// <param name="index">Index of the variation selected.</param>
+        void VariationSelected (int index);
+        /// <summary>
+        /// Called after an undo/redo action has been made on the editor.
+        /// </summary>
+        void OnUndoRedo ();
         #endregion
 
         #region Draw
@@ -54,6 +68,10 @@ namespace Broccoli.BroccoEditor
         /// Draw the second options on the Select Mode View.
         /// </summary>
         void DrawSelectModeViewAfterOptions ();
+        /// <summary>
+        /// Draws custom panels for the loaded structure collection.
+        /// </summary>
+        void DrawPanels ();
         #endregion
         //float health { get; set; } //A variable
         //void ApplyDamage(float points); //Function with one argument

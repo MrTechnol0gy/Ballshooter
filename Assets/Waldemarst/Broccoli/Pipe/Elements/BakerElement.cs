@@ -45,7 +45,7 @@ namespace Broccoli.Pipe {
 		/// <summary>
 		/// Enables AO on the preview tree.
 		/// </summary>
-		public bool enableAOInPreview = false;
+		public bool enableAOInPreview = true;
 		/// <summary>
 		/// Enables AO when processing trees at runtime.
 		/// </summary>
@@ -80,10 +80,6 @@ namespace Broccoli.Pipe {
 		/// </summary>
 		List<Position> enabledPositions = new List<Position> ();
 		/// <summary>
-		/// Option to add a collision object at trunk level.
-		/// </summary>
-		public bool addCollisionObjectAtTrunk = false;
-		/// <summary>
 		/// Modes to animate transition between LOD states.
 		/// </summary>
 		public enum LODFade {
@@ -103,6 +99,38 @@ namespace Broccoli.Pipe {
 		/// LOD transition width for crossfade mode.
 		/// </summary>
 		public float lodTransitionWidth = 0.4f;
+		/// <summary>
+		/// Option to add a collision object at trunk level.
+		/// </summary>
+		public bool addCollider = false;
+		/// <summary>
+		/// Collider types.
+		/// </summary>
+		public enum ColliderType {
+			Capsule = 0,
+			Convex = 1,
+			NonConvex = 2
+		}
+		/// <summary>
+		/// Type of collider to add to the tree.
+		/// </summary>
+		public ColliderType colliderType = ColliderType.Capsule;
+		/// <summary>
+		/// Increases the size of the collider for capsule collider type.
+		/// </summary>
+		public float colliderScale = 1f;
+		/// <summary>
+		/// Resolution scale from the original tree mesh.
+		/// </summary>
+		public float colliderMeshResolution = 0.5f;
+		/// <summary>
+		/// Minimum branch/root structure for the collider.
+		/// </summary>
+		public int colliderMinLevel = 0;
+		/// <summary>
+		/// Maximum branch/root structure for the collider.
+		/// </summary>
+		public int colliderMaxLevel = 1;
 		#endregion
 
 		#region Constructors
@@ -188,6 +216,12 @@ namespace Broccoli.Pipe {
 			clone.lodFade = lodFade;
 			clone.lodFadeAnimate = lodFadeAnimate;
 			clone.lodTransitionWidth = lodTransitionWidth;
+			clone.addCollider = addCollider;
+			clone.colliderType = colliderType;
+			clone.colliderScale = colliderScale;
+			clone.colliderMeshResolution = colliderMeshResolution;
+			clone.colliderMinLevel = colliderMinLevel;
+			clone.colliderMaxLevel = colliderMaxLevel;
 			return clone;
 		}
 		#endregion

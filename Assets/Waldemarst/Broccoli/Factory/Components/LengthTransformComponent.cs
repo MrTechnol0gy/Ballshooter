@@ -34,7 +34,6 @@ namespace Broccoli.Component
 			TreeFactoryProcessControl processControl = null) 
 		{
 			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
-			lengthTransformElement.PrepareSeed ();
 		}
 		/// <summary>
 		/// Gets the changed aspects on the tree for this component.

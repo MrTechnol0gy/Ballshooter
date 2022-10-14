@@ -42,7 +42,6 @@ namespace Broccoli.Component
 			TreeFactoryProcessControl processControl = null) 
 		{
 			base.PrepareParams (treeFactory, useCache, useLocalCache, processControl);
-			branchBenderElement.PrepareSeed ();
 
 			// Get structure levels overriding noise.
 			overrideNoiseLevels.Clear ();
