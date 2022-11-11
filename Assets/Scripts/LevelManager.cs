@@ -11,22 +11,23 @@ public class LevelManager : MonoBehaviour
     
     public int nextScene;
     private int currentScene;
+    public int levelSelect;
     
     
-    public void LoadNextlevel()
-    {
-        nextScene = SceneManager.GetActiveScene().buildIndex + 1;
+    //public void LoadNextlevel()
+    //{
+    //    nextScene = SceneManager.GetActiveScene().buildIndex + 1;
         
-        if (nextScene <= 5)
-        {
-            SceneManager.LoadScene(nextScene);                       
-        }
+    //    if (nextScene <= 5)
+    //    {
+    //        SceneManager.LoadScene(nextScene);                       
+    //    }
 
-        else if (nextScene >= 6)
-        {
-            Debug.Log("All levels complete!");
-        }
-    }
+    //    else if (nextScene >= 6)
+    //    {
+    //        Debug.Log("All levels complete!");
+    //    }
+    //}
 
     public void LoadMainMenu()
     {
@@ -36,6 +37,10 @@ public class LevelManager : MonoBehaviour
     public void ReloadCurrentScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    public void LevelSelect()
+    {
+        SceneManager.LoadScene(levelSelect);
     }
 
     public void QuitGame()
