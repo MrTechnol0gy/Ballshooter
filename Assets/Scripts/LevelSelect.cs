@@ -9,6 +9,7 @@ public class LevelSelect : MonoBehaviour
 {    
     public int level;
     public TMP_Text levelText;
+    public int levelSelect;
 
     // Start is called before the first frame update
     void Start()
@@ -24,5 +25,9 @@ public class LevelSelect : MonoBehaviour
     public void OpenScene()
     {
         SceneManager.LoadScene("lvl" + level.ToString());
+    }
+    public void LevelSelector()
+    {
+        SceneManager.LoadScene("levelselect");
     }
 }
