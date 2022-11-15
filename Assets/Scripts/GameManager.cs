@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 // Sam Robichaud 
 // NSCC Truro 2022
@@ -48,6 +50,10 @@ public class GameManager : MonoBehaviour
     private GameState gameState;
     private GameState LastGameState;
 
+    public int level;
+    public TMP_Text levelText;
+    public int levelSelect;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,6 +62,7 @@ public class GameManager : MonoBehaviour
         _uIManager = uIManager.GetComponent<UIManager>();
         startPosition = GameObject.FindWithTag("StartPos");
         cameraOrbit.GetComponent<MouseOrbitImproved>().enabled = false;
+        levelText.text = level.ToString(); //level select addition
     }
 
     // Update is called once per frame
@@ -294,7 +301,14 @@ public class GameManager : MonoBehaviour
         gameState = LastGameState;
     }
     
+    public void OpenScene()
+    {
+        SceneManager.LoadScene("lvl" + level.ToString());
+    }
 
-
+    public void LevelSelector()
+    {
+        SceneManager.LoadScene("levelselect");
+    }
 
 }
