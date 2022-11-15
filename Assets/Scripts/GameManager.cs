@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public GameObject LevelFailUI;
     public GameObject GameCompleteUI;
     public GameObject PauseMenuUI;
+    public GameObject LevelSelectUI; //level select addition
     
     public GameObject BallGroup;    
 
@@ -42,7 +43,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject startPosition;
 
-    public enum GameState { MainMenu, Aim, Rolling, LoseCheck, LevelComplete, Paused }
+    public enum GameState { MainMenu, Aim, Rolling, LoseCheck, LevelComplete, Paused, LevelSelect } //levelselect added for level selection addition
 
     private GameState gameState;
     private GameState LastGameState;
@@ -70,6 +71,7 @@ public class GameManager : MonoBehaviour
                 LevelCompleteUI.SetActive(false);
                 GameCompleteUI.SetActive(false);
                 LevelFailUI.SetActive(false);
+                LevelSelectUI.SetActive(false); // level select addition
                 break;
 
 
@@ -82,6 +84,7 @@ public class GameManager : MonoBehaviour
                 LevelCompleteUI.SetActive(false);
                 GameCompleteUI.SetActive(false);
                 LevelFailUI.SetActive(false);
+                LevelSelectUI.SetActive(false); // level select addition
 
                 _uIManager.modeText.text = "Aim with MOUSE \n & \n Shoot with SPACE";
 
@@ -187,6 +190,17 @@ public class GameManager : MonoBehaviour
                 }
 
                 break;
+
+            case GameState.LevelSelect:
+                cameraOrbit.GetComponent<MouseOrbitImproved>().enabled = false;
+                LevelSelectUI.SetActive(true);
+                Time.timeScale = 0f;
+
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    UnPause();
+                }
+                break;
         }
 
     }
@@ -275,6 +289,7 @@ public class GameManager : MonoBehaviour
     {
         cameraOrbit.GetComponent<MouseOrbitImproved>().enabled = true;
         PauseMenuUI.SetActive(false);
+        LevelSelectUI.SetActive(false); // level select addition
         Time.timeScale = 1f;
         gameState = LastGameState;
     }
