@@ -1,12 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Playables;
 using TMPro;
 
 public class PlayerScript : MonoBehaviour
 {
     public TextMeshProUGUI keysAmountText;
     private int keys;
+    public PlayableDirector entryWay;
+    public PlayableDirector audienceHall;
+    public PlayableDirector audienceHall2;
+    public PlayableDirector portalRoom;
+    public PlayableDirector secretHall;
+    public PlayableDirector secretHall2;
 
     // Start is called before the first frame update
     void Start()
@@ -16,31 +23,43 @@ public class PlayerScript : MonoBehaviour
     }
     
     void SetKeysText()
-    {
-        Debug.Log("This should change the amount of keys.");
+    {        
         keysAmountText.text = "Keys: " + keys.ToString();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Pickup"))
-        {
-            Debug.Log("The pickup is recognized.");
-            Debug.Log("The pickup will be set inactive.");
-
+        {            
             other.gameObject.SetActive(false);
-
-            Debug.Log("The pickup should now be inactive.");
-            Debug.Log("The keys int should now go up by one in the code.");
-
             keys = keys + 1;
-
-            Debug.Log("The keys int should now be increased by one in the code.");
-            Debug.Log("SetKeysText method will now be called.");
-
             SetKeysText();
-
-            Debug.Log("SetKeysText method has been called and the keys amount shown in the UI should be increased by one.");
+            OpenDoor();
+            
+        }
+    }
+    private void OpenDoor()
+    {
+        switch (keys)
+        {
+            case 1:
+                entryWay.Play();
+                break;
+            case 2:
+                audienceHall.Play();
+                audienceHall2.Play();
+                break;
+            case 6:
+                secretHall.Play();
+                break;
+            case 7:
+                secretHall2.Play();
+                break;
+            case 8:
+                portalRoom.Play();
+                break;
+            default:
+                break;
         }
     }
 }
